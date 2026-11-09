@@ -751,6 +751,9 @@ Install tox: ``pip install tox``
 
 Run test for Python 3.13: ``tox -e py313``
 
+Run the model-based contracts (Python 3.13 and Node.js 22+): ``tox -e contracts``. See
+`contracts/README.md <https://github.com/tobgu/pyrsistent/blob/master/contracts/README.md>`_.
+
 Release
 ~~~~~~~
 1. `pip install -r requirements.txt`
