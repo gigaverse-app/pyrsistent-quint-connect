@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "name": "pmap-evolver",
+  "description": "PMap.evolver(): stores and removes, KeyError on a missing key, is_dirty(), persistent() snapshots that later writes never change, and an original map that never changes.",
+  "module": "pmap_evolver",
+  "model": "pmap_evolver.qnt",
+  "invariant": "consistent",
+  "actions": {
+    "init": "e = pmap({0: 0}, pre_size=2).evolver()",
+    "store": "e[key] = value",
+    "erase": "e.remove(key), observed as Removed or Missing (KeyError)",
+    "persist": "snapshot = e.persistent()",
+    "inspect": "read e, the snapshot and the original map without changing them"
+  },
+  "witnesses": [
+    "snapshotSurvivesLaterWritesTest",
+    "growingKeepsCollidingKeysTest",
+    "removingMissingKeyRaisesTest",
+    "sameValueStoreStaysCleanTest"
+  ],
+  "mutants": [
+    {"name": "remove-keeps-count", "description": "remove() takes the entry out but does not decrement the size, so len() overcounts"},
+    {"name": "remove-missing-silent", "description": "remove() of a missing key returns quietly instead of raising KeyError"},
+    {"name": "overwrite-in-place", "description": "overwriting a key edits the shared bucket list in place, changing the original map and earlier snapshots"},
+    {"name": "rehash-drops-collisions", "description": "growing the bucket vector keeps only one key per new bucket, losing colliding keys"},
+    {"name": "persistent-forgets-result", "description": "persistent() does not keep the map it built, so a later call with no new writes returns the original map"}
+  ],
+  "bounds": {"seed": 7, "max_samples": 200, "max_steps": 10, "n_traces": 16},
+  "root": "../..",
+  "sources": ["pyrsistent/_pmap.py"],
+  "attest": {"package": "pyrsistent", "source": "."},
+  "limits": [
+    "Keys 0, 1, 2 and 4, values 0-2, starting from {0: 0} in a two-bucket map, at most 10 steps per sampled history.",
+    "One evolver per history; evolvers made from the snapshot, and PVector and PSet evolvers, are not modeled.",
+    "Single-threaded; the driver's projection of the evolver over keys 0-7 is trusted."
+  ]
+}
